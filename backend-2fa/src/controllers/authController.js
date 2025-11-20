@@ -15,6 +15,9 @@ import { sendSuccess, sendError } from '../utils/responseParams.js';
 const registerUser = async (req, res) => {
   try {
     const { name, email, password, phone } = req.body;
+    if (!phone || phone.trim() === "") {
+      phone = null;
+    }
 
     // Kiểm tra mật khẩu
     if (!validatePassword(password)) {
@@ -27,7 +30,7 @@ const registerUser = async (req, res) => {
       return sendError(res, 'Email này đã tồn tại trong hệ thống.');
     }
 
-    if (phone && phone.trim() !== "") {
+    if (phone) {
       const phoneExists = await User.findOne({ phone });
       if (phoneExists) {
         return sendError(res, 'Số điện thoại đã bị trùng, vui lòng sử dụng số điện thoại khác.');
@@ -97,13 +100,14 @@ const verifyEmail = async (req, res) => {
 
     if (!pendingUser) return sendError(res, 'Mã xác thực hết hạn hoặc email chưa đăng ký.');
     if (pendingUser.otpCode !== otp) return sendError(res, 'Mã OTP không chính xác.');
+    const phoneToSave = (pendingUser.phone && pendingUser.phone !== "") ? pendingUser.phone : null;
 
     // Tạo User 
     await User.create({
       username: pendingUser.username,
       email: pendingUser.email,
       password: pendingUser.password,
-      phone: pendingUser.phone,
+      phone: phoneToSave,
       is2FAEnabled: false
     });
     await PendingUser.deleteOne({ _id: pendingUser._id });
