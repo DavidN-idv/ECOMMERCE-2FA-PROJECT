@@ -19,8 +19,8 @@ const authService = {
     return response;
   },
 
-  register: async (email, password, name) => {
-    const response = await api.post('/auth/register', { email, password, name });
+  register: async (email, password, name, phone) => {
+    const response = await api.post('/auth/register', { email, password, name, phone });
     return response;
   },
 

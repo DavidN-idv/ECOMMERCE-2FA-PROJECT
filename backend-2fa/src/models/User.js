@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     //required: true,
     default: '', // Để mặc định rỗng
-    unique: true, //1 sđt chỉ được dùng cho 1 acc
+    sparse: true, //1 sđt chỉ được dùng cho 1 acc
   },
   avatar: {
     type: String,

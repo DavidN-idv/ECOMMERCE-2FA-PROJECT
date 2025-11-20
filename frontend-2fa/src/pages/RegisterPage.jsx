@@ -80,6 +80,7 @@ const isValidEmail = (email) => {
 const RegisterPage = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -87,12 +88,10 @@ const RegisterPage = () => {
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  // (Loại bỏ state toast)
 
   //const navigate = useNavigate();
-  const { register: registerUser } = useAuth(); // Get register function from AuthContext
+  const { register: registerUser } = useAuth(); 
 
-  // (Loại bỏ useEffect của toast)
   useEffect(() => {
     if (error) setTimeout(() => setError(null), 4000);
   }, [error]);
@@ -123,7 +122,7 @@ const handleSubmit = async (e) => {
     setLoading(true);
 
     try {
-      await registerUser(email, password, name);
+      await registerUser(email, password, name, phone);
       // Note: registerUser() handles navigation to /verify-otp via AuthContext
     } catch (err) {
       console.error("Lỗi đăng ký:", err.message);
@@ -155,6 +154,14 @@ const handleSubmit = async (e) => {
             required disabled={loading}
             //pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
             title="Vui lòng nhập email đúng định dạng (ví dụ: user@domain.com)"
+          />
+          <input
+            type="tel" 
+            className="auth-input" 
+            placeholder="Số điện thoại (Tùy chọn)"
+            value={phone} 
+            onChange={(e) => setPhone(e.target.value)}
+            disabled={loading}
           />
           
           {/* Bọc phần mật khẩu và popover */}

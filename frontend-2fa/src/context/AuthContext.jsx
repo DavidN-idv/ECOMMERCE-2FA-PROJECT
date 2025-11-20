@@ -63,9 +63,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   // HÀM REGISTER (ĐIỀU HƯỚNG)
-  const register = async (email, password, name) => {
+  const register = async (email, password, name, phone) => {
     try {
-      await authService.register(email, password, name);
+      await authService.register(email, password, name, phone);
       // Đăng ký xong, chuyển sang xác thực email
       navigate(`/verify-otp?email=${email}`);
     } catch (error) {
