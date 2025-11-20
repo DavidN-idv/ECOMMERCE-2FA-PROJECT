@@ -1,5 +1,7 @@
 import User from '../models/User.js';
 import Otp from '../models/Otp.js';
+import PendingUser from '../models/PendingUser.js';
+import bcrypt from 'bcryptjs';
 import generateToken from '../utils/generateToken.js';
 import sendEmail from '../utils/sendEmail.js';
 import { validatePassword } from '../utils/validation.js';
@@ -25,18 +27,26 @@ const registerUser = async (req, res) => {
       return sendError(res, 'Email này đã tồn tại trong hệ thống.');
     }
 
-    // Tạo user mới
-    const user = await User.create({
+    if (phone && phone.trim() !== "") {
+      const phoneExists = await User.findOne({ phone });
+      if (phoneExists) {
+        return sendError(res, 'Số điện thoại đã bị trùng, vui lòng sử dụng số điện thoại khác.');
+      }
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    await PendingUser.findOneAndDelete({ email });
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Tạo Pending user mới
+    await PendingUser.create({
       username: name || email.split('@')[0],
       email,
-      password,
+      password: hashedPassword, // Lưu pass đã mã hóa
       phone,
-      is2FAEnabled: false
+      otpCode
     });
-
-    // Tạo OTP xác thực emai
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    await Otp.create({ userId: user._id, otpCode });
 
     // Nội dung Email
     const message = `
@@ -54,15 +64,19 @@ const registerUser = async (req, res) => {
     `;
 
     // Gửi email
-    await sendEmail({
-      email: user.email,
-      subject: 'Xác thực tài khoản My Beauty',
-      message: message,
-    });
+    try {
+      await sendEmail({
+        email,
+        subject: 'Xác thực tài khoản My Beauty',
+        message: message,
+      });
+    } catch (err) {
+      await PendingUser.findOneAndDelete({ email });
+      return sendError(res, "Không thể gửi email xác thực. Vui lòng kiểm tra lại địa chỉ email.");
+    }
 
     return sendSuccess(res, {
-      message: "Đăng ký thành công! Vui lòng kiểm tra email.",
-      userId: user._id
+      message: "Mã xác thực đã được gửi. Vui lòng kiểm tra email.",
     });
 
   } catch (error) {
@@ -79,18 +93,31 @@ const registerUser = async (req, res) => {
 const verifyEmail = async (req, res) => {
   try {
     const { email, otp } = req.body;
-    const user = await User.findOne({ email });
+    const pendingUser = await PendingUser.findOne({ email });
 
-    if (!user) return sendError(res, 'Email không tồn tại');
+    if (!pendingUser) return sendError(res, 'Mã xác thực hết hạn hoặc email chưa đăng ký.');
+    if (pendingUser.otpCode !== otp) return sendError(res, 'Mã OTP không chính xác.');
 
-    const otpRecord = await Otp.findOne({ userId: user._id, otpCode: otp });
-    if (!otpRecord) return sendError(res, 'Mã OTP không hợp lệ');
+    // Tạo User 
+    await User.create({
+      username: pendingUser.username,
+      email: pendingUser.email,
+      password: pendingUser.password,
+      phone: pendingUser.phone,
+      is2FAEnabled: false
+    });
+    await PendingUser.deleteOne({ _id: pendingUser._id });
 
-    await Otp.deleteOne({ _id: otpRecord._id });
-
-    //user.isEmailVerified = true;
-    return sendSuccess(res, { message: "Xác thực email thành công!" });
+    return sendSuccess(res, { message: "Xác thực email thành công! Bạn có thể đăng nhập ngay." });
   } catch (error) {
+    if (error.code === 11000) {
+      if (error.keyPattern && error.keyPattern.phone) {
+        return sendError(res, 'Số điện thoại này đã được đăng ký bởi tài khoản khác trong lúc bạn chờ xác thực.');
+      }
+      if (error.keyPattern && error.keyPattern.email) {
+        return sendError(res, 'Email này đã được đăng ký.');
+      }
+    }
     return sendError(res, error.message, 500);
   }
 };
@@ -112,10 +139,7 @@ const authUser = async (req, res) => {
         const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
         // Xóa OTP cũ nếu có
         await Otp.deleteMany({ userId: user._id });
-        await Otp.create({
-          userId: user._id,
-          otpCode,
-        });
+        await Otp.create({ userId: user._id, otpCode });
 
         // Nội dung Email
         const message = `
@@ -158,16 +182,16 @@ const authUser = async (req, res) => {
       });
 
     } else {
-      res.status(401).json({ message: 'Sai email hoặc mật khẩu' });
+      return sendError(res, 'Sai email hoặc mật khẩu', 401);
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return sendError(res, error.message, 500);
   }
 };
 
 /**-----------------------------------------------
 * @desc    Đăng nhập: Verify OTP
-* @route   POST /api/auth/verify-otp
+* @route   POST /api/auth/verify-2fa
 * @access  Public
 */
 const verify2FA = async (req, res) => {
@@ -191,7 +215,7 @@ const verify2FA = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return sendError(res, error.message, 500);
   }
 };
 
@@ -246,9 +270,7 @@ const enable2FAConfirm = async (req, res) => {
     const user = await User.findById(req.user._id);
 
     const otpRecord = await Otp.findOne({ userId: user._id, otpCode: otp });
-    if (!otpRecord) {
-      return sendError(res, "Mã OTP kích hoạt không đúng");
-    }
+    if (!otpRecord) return sendError(res, "Mã OTP kích hoạt không đúng");
 
     user.is2FAEnabled = true;
     await user.save();
@@ -300,28 +322,27 @@ const refreshToken = async (req, res) => {
     const cookies = req.cookies;
 
     if (!cookies?.jwt) {
-      return res.status(401).json({ message: 'Bạn chưa đăng nhập (Không có Refresh Token)' });
+      return sendError(res, 'Bạn chưa đăng nhập (Không có Refresh Token)');
     }
 
     const refreshToken = cookies.jwt;
 
     // Verify token
-    jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, (err, decoded) => {
-      if (err) {
-        return res.status(403).json({ message: 'Phiên đăng nhập hết hạn' });
-      }
-
-      const newAccessToken = jwt.sign(
+    const jwt = await import('jsonwebtoken');
+    try {
+      const decoded = jwt.default.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+      const newAccessToken = jwt.default.sign(
         { userId: decoded.userId },
         process.env.JWT_ACCESS_SECRET,
         { expiresIn: '15m' }
       );
 
-      res.json({ accessToken: newAccessToken });
-    });
-
+      return sendSuccess(res, { accessToken: newAccessToken });
+    } catch (err) {
+      return sendError(res, 'Phiên đăng nhập hết hạn hoặc token không hợp lệ', 403);
+    }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return sendError(res, error.message, 500);
   }
 };
 
@@ -334,7 +355,7 @@ const logoutUser = (req, res) => {
     httpOnly: true,
     expires: new Date(0),
   });
-  res.status(200).json({ message: 'Đăng xuất thành công' });
+  return sendSuccess(res, { message: 'Đăng xuất thành công' });
 };
 
 
@@ -397,7 +418,9 @@ const resetPassword = async (req, res) => {
     if (!otpRecord) return sendError(res, 'Mã OTP không chính xác');
 
     // Đặt lại pass
-    user.password = newPassword;
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+
     await user.save();
     await Otp.deleteOne({ _id: otpRecord._id });
 

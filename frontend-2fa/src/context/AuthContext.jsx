@@ -3,6 +3,14 @@ import React, { createContext, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import authService from "../services/authService";
 
+const getErrorMessage = (error, defaultMessage) => {
+  return (
+    error.response?.data?.response?.data?.message || 
+    error.response?.data?.message ||                 
+    error.message || 
+    defaultMessage
+  );
+};
 
 const AuthContext = createContext();
 //eslint-disable-next-line react-refresh/only-export-components
@@ -49,7 +57,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await authService.login(email, password);
-      const data = response.data.data;
+      const data = response.data.data || response.data;
 
       if (data.requires2FA) {
         // Nếu cần 2FA, điều hướng và truyền userId + email (để hiển thị)
@@ -58,7 +66,7 @@ export const AuthProvider = ({ children }) => {
         loginSuccess(data);
       }
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Lỗi đăng nhập');
+      throw new Error(getErrorMessage(error, 'Lỗi đăng nhập'));
     }
   };
 
@@ -69,7 +77,7 @@ export const AuthProvider = ({ children }) => {
       // Đăng ký xong, chuyển sang xác thực email
       navigate(`/verify-otp?email=${email}`);
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Lỗi đăng ký');
+      throw new Error(getErrorMessage(error, 'Lỗi đăng ký'));
     }
   };
 
@@ -80,7 +88,7 @@ export const AuthProvider = ({ children }) => {
       await authService.verifyEmailOtp(email, otp);
       navigate('/login');
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Lỗi xác thực OTP');
+      throw new Error(getErrorMessage(error, 'Lỗi xác thực OTP'));
     }
   };
 
@@ -91,7 +99,7 @@ export const AuthProvider = ({ children }) => {
       alert(response.data.message); // Hiển thị thông báo thành công
       navigate('/login');
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Lỗi đặt lại mật khẩu');
+      throw new Error(getErrorMessage(error, 'Lỗi đặt lại mật khẩu'));
     }
   };
 
@@ -101,7 +109,7 @@ export const AuthProvider = ({ children }) => {
       // Hàm này chỉ gọi, không điều hướng
       return await authService.requestPasswordReset(email);
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Lỗi gửi email');
+      throw new Error(getErrorMessage(error, 'Lỗi gửi email'));
     }
   };
 
@@ -124,7 +132,7 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         user,
-        setUser, // <-- ĐÃ THÊM ĐỂ ACCOUNT PAGE SỬ DỤNG
+        setUser, 
         token,
         isAuthenticated: !!token,
         login,
@@ -133,7 +141,7 @@ export const AuthProvider = ({ children }) => {
         logout,
         requestPasswordReset,
         resetPassword,
-        loginSuccess // Dùng cho VerifyOtpPage (luồng 2FA)
+        loginSuccess 
       }}
     >
       {children}

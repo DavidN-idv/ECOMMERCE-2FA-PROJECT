@@ -93,7 +93,7 @@ const RegisterPage = () => {
   const { register: registerUser } = useAuth(); 
 
   useEffect(() => {
-    if (error) setTimeout(() => setError(null), 4000);
+    if (error) setTimeout(() => setError(null), 10000);
   }, [error]);
 
   const s = score(password, email);
@@ -126,7 +126,7 @@ const handleSubmit = async (e) => {
       // Note: registerUser() handles navigation to /verify-otp via AuthContext
     } catch (err) {
       console.error("Lỗi đăng ký:", err.message);
-      setError(err.response?.data?.message || "Đăng ký thất bại");
+      setError(err.message || "Đăng ký thất bại");
     } finally {
       setLoading(false);
     }
@@ -145,12 +145,12 @@ const handleSubmit = async (e) => {
 
           <input
             type="text" className="auth-input" placeholder="Họ và tên"
-            value={name} onChange={(e) => setName(e.target.value)}
+            value={name} onChange={(e) => {setName(e.target.value) ; setError(null)}}
             required disabled={loading}
           />
           <input
             type="email" className="auth-input" placeholder="Email"
-            value={email} onChange={(e) => setEmail(e.target.value)}
+            value={email} onChange={(e) => {setEmail(e.target.value); setError(null);}}
             required disabled={loading}
             //pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
             title="Vui lòng nhập email đúng định dạng (ví dụ: user@domain.com)"
@@ -160,7 +160,7 @@ const handleSubmit = async (e) => {
             className="auth-input" 
             placeholder="Số điện thoại (Tùy chọn)"
             value={phone} 
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={(e) => {setPhone(e.target.value); setError(null);}}
             disabled={loading}
           />
           
@@ -175,7 +175,7 @@ const handleSubmit = async (e) => {
                 className="auth-input" 
                 placeholder="Mật khẩu"
                 value={password} 
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {setPassword(e.target.value); setError(null);}}
                 onFocus={() => setIsPasswordInfoVisible(true)}
                 required minLength={8} disabled={loading}
               />
@@ -232,7 +232,7 @@ const handleSubmit = async (e) => {
             className="auth-input" 
             placeholder="Nhập lại mật khẩu"
             value={confirmPassword} 
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            onChange={(e) => {setConfirmPassword(e.target.value); setError(null);}}
             required disabled={loading}
           />
 
