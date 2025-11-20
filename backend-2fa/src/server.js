@@ -10,9 +10,18 @@ dotenv.config();
 connectDB();
 
 const app = express();
+const allowedOrigins = ['http://localhost:5173', 'http://localhost:3000'];
+
 app.use(cors({
-  origin: 'http://localhost:3000', 
-  credentials: true // cho phép gửi Cookie (RefreshToken) qua lại
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.error("Blocked by CORS:", origin); // Log ra để dễ debug nếu bị chặn
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true // Cho phép gửi cookie/token
 }));
 app.use(express.json());
 app.use(cookieParser());

@@ -2,7 +2,7 @@ import express from 'express';
 import { 
   registerUser, authUser, verifyEmail, verify2FA,
   enable2FARequest, enable2FAConfirm, disable2FA,
-  forgotPassword, resetPassword
+  forgotPassword, resetPassword, logoutUser, refreshToken
 } from '../controllers/authController.js';
 import { changePassword } from '../controllers/userController.js'; // Import changePassword từ userController
 import { protect } from '../middleware/authMiddleware.js';
@@ -16,6 +16,8 @@ router.post('/login', authUser);
 router.post('/verify-2fa', verify2FA);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
+router.post('/refresh', refreshToken);
+router.post('/logout', logoutUser);
 
 // Private (Cần Token)
 router.post('/2fa/enable-request', protect, enable2FARequest);

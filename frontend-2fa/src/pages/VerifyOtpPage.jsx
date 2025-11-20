@@ -1,34 +1,25 @@
 // src/pages/VerifyOtpPage.jsx
 import React, { useState } from "react";
-// 1. Import thêm useLocation
 import { useSearchParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-// 2. Import unified authService (mock or real)
 import authService from "../services/authService"; 
 
 const VerifyOtpPage = () => {
   const { 
     user,
-    verifyOtp,      // Hàm này từ Context (dùng cho xác thực email)
-    loginSuccess    // Hàm này từ Context (dùng để hoàn tất đăng nhập 2FA)
+    loginSuccess    
   } = useAuth();
   
   const navigate = useNavigate();
-  
-  // 3. Lấy cả hai nguồn dữ liệu
   const [searchParams] = useSearchParams();
   const location = useLocation();
 
-  // 4. KIỂM TRA XEM ĐANG Ở CHẾ ĐỘ NÀO
-  
-  // Chế độ 1: Xác thực Email (lấy từ URL)
+  // Lấy thông tin
   const emailForVerification = searchParams.get("email"); 
-  
-  // Chế độ 2: Đăng nhập 2FA (lấy từ state điều hướng)
   const userIdFor2FA = location.state?.userId;
 
   // Quyết định chế độ
-  const is2FAMode = !!userIdFor2FA; // true nếu là đăng nhập 2FA
+  const is2FAMode = !!userIdFor2FA; 
   const emailToShow = emailForVerification || location.state?.email || user?.email || "";
 
   const [otp, setOtp] = useState("");
@@ -43,15 +34,19 @@ const VerifyOtpPage = () => {
     if (is2FAMode) {
       // --- LUỒNG 1: ĐĂNG NHẬP 2FA ---
       try {
-        // Gọi thẳng authService (vì Context chưa cung cấp)
         const response = await authService.verify2FA(userIdFor2FA, otp);
         
-        // Đăng nhập thành công!
-        // Gọi hàm loginSuccess từ Context để lưu token và điều hướng
-        loginSuccess(response.data); 
+        // --- SỬA LỖI TẠI ĐÂY ---
+        // Bóc tách dữ liệu từ wrapper { data: { ... } } của Backend
+        const responseData = response.data;
+        const payload = responseData.data || responseData; 
+        
+        // Lưu token và chuyển hướng
+        loginSuccess(payload); 
         
       } catch (err) {
-        setError(err.response?.data?.message || err.message);
+        const msg = err.response?.data?.response?.data?.message || err.response?.data?.message || err.message;
+        setError(msg);
       } finally {
         setLoading(false);
       }
@@ -63,7 +58,8 @@ const VerifyOtpPage = () => {
         alert("Xác thực email thành công! Bạn có thể đăng nhập.");
         navigate("/login");
       } catch (err) {
-        setError(err.response?.data?.message || err.message);
+        const msg = err.response?.data?.response?.data?.message || err.response?.data?.message || err.message;
+        setError(msg);
       } finally {
         setLoading(false);
       }
@@ -71,7 +67,7 @@ const VerifyOtpPage = () => {
   };
 
   return (
-    <div className="auth-container"> {/* Sử dụng class từ AuthPages.css */}
+    <div className="auth-container">
       <div className="auth-box">
         <h1 className="auth-title">Xác thực OTP</h1>
         <p className="auth-subtitle">
@@ -87,7 +83,7 @@ const VerifyOtpPage = () => {
           <input
             type="text"
             className="auth-input"
-            placeholder={is2FAMode ? "Nhập mã 2FA (Mock: 123456)" : "Nhập mã OTP (Mock: 111111)"}
+            placeholder={is2FAMode ? "Nhập mã 2FA" : "Nhập mã OTP"}
             value={otp}
             onChange={(e) => setOtp(e.target.value)}
             required

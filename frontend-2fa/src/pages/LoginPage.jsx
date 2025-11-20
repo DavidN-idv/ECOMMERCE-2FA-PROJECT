@@ -1,6 +1,6 @@
 // src/pages/LoginPage.jsx
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom"; // 1. Import useNavigate
+import { Link } from "react-router-dom"; // 1. Import useNavigate
 import "./../styles/AuthPages.css";
 import { useAuth } from "../context/AuthContext"; // Import useAuth from AuthContext
 
@@ -13,7 +13,7 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null); // Sẽ lưu nội dung lỗi
 
-  const navigate = useNavigate(); // 5. Khởi tạo hook navigate
+  //const navigate = useNavigate(); // 5. Khởi tạo hook navigate
   const { login } = useAuth(); // Sử dụng login từ AuthContext
 
   // 6. Cập nhật handleSubmit thành async

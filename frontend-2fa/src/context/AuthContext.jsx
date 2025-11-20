@@ -1,7 +1,7 @@
 //context/AuthContext.jsx
 import React, { createContext, useState, useContext } from "react";
-import { useNavigate } from "react-router-dom"; 
-import authService from "../services/authService"; 
+import { useNavigate } from "react-router-dom";
+import authService from "../services/authService";
 
 
 const AuthContext = createContext();
@@ -16,7 +16,15 @@ export const useAuth = () => {
 
 // AUTH PROVIDER
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")) || null);
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem("user");
+      return savedUser && savedUser !== "undefined" ? JSON.parse(savedUser) : null;
+    } catch (error) {
+      console.error("Lỗi parse user từ localStorage:", error);
+      return null;
+    }
+  });
   const [token, setToken] = useState(localStorage.getItem("token") || null);
   const navigate = useNavigate(); // 5. KHỞI TẠO NAVIGATE
 
@@ -26,12 +34,12 @@ export const AuthProvider = ({ children }) => {
     setToken(data.accessToken);
     localStorage.setItem("user", JSON.stringify(data.user));
     localStorage.setItem("token", data.accessToken);
-    
+
     // Store refresh token if provided (for token refresh flow)
     // if (data.refreshToken) {
     //   localStorage.setItem("refreshToken", data.refreshToken);
     // }
-    
+
     if (successMessage) alert(successMessage);
     // Điều hướng về trang chủ/tài khoản (replace: true để không "Back" lại được)
     navigate("/", { replace: true });
@@ -40,14 +48,14 @@ export const AuthProvider = ({ children }) => {
   // HÀM LOGIN
   const login = async (email, password) => {
     try {
-      const response = await authService.login(email, password); 
+      const response = await authService.login(email, password);
       const data = response.data.data;
 
       if (data.requires2FA) {
         // Nếu cần 2FA, điều hướng và truyền userId + email (để hiển thị)
         navigate('/verify-otp', { state: { userId: data.userId, email: email } });
       } else {
-        loginSuccess(data); 
+        loginSuccess(data);
       }
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Lỗi đăng nhập');
@@ -75,7 +83,7 @@ export const AuthProvider = ({ children }) => {
       throw new Error(error.response?.data?.message || 'Lỗi xác thực OTP');
     }
   };
-  
+
   // HÀM RESET PASSWORD
   const resetPassword = async (email, otp, newPassword) => {
     try {
@@ -93,16 +101,16 @@ export const AuthProvider = ({ children }) => {
       // Hàm này chỉ gọi, không điều hướng
       return await authService.requestPasswordReset(email);
     } catch (error) {
-       throw new Error(error.response?.data?.message || 'Lỗi gửi email');
+      throw new Error(error.response?.data?.message || 'Lỗi gửi email');
     }
   };
 
   // HÀM LOGOUT
   const logout = async () => {
     try {
-        await authService.logout(); 
+      await authService.logout();
     } catch (e) {
-        console.error(e);
+      console.error(e);
     }
     setUser(null);
     setToken(null);

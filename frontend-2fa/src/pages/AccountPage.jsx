@@ -2,15 +2,15 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import authService from '../services/authService';
-import { useNavigate } from 'react-router-dom';
+//import { useNavigate } from 'react-router-dom';
 import ChangePassword from './ChangePassword';
 import '../styles/AccountPage.css';
 
 const AccountPage = () => {
   const { user, logout, setUser } = useAuth();
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
   
-  const [is2faEnabled, setIs2faEnabled] = useState(user?.is_2fa_enabled || false);
+  const [is2faEnabled, setIs2faEnabled] = useState(user?.is2FAEnabled || false);
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [showPasswordInput, setShowPasswordInput] = useState(false);
   const [otp, setOtp] = useState('');
@@ -22,7 +22,7 @@ const AccountPage = () => {
 
   useEffect(() => {
     if (user) {
-      setIs2faEnabled(user.is_2fa_enabled);
+      setIs2faEnabled(user.is2FAEnabled);
     }
   }, [user]);
 
@@ -62,7 +62,7 @@ const AccountPage = () => {
       setIs2faEnabled(true); 
       setShowOtpInput(false); 
       setOtp('');
-      setUser({ ...user, is_2fa_enabled: true }); 
+      setUser({ ...user, is2FAEnabled: true }); 
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Lỗi');
     } finally {
@@ -79,7 +79,7 @@ const AccountPage = () => {
       setIs2faEnabled(false); 
       setShowPasswordInput(false); 
       setPassword('');
-      setUser({ ...user, is_2fa_enabled: false });
+      setUser({ ...user, is2FAEnabled: false });
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Lỗi');
     } finally {
@@ -134,7 +134,7 @@ const AccountPage = () => {
               <p className="form-label">Một mã OTP đã được gửi đến email của bạn</p>
               <input
                 type="text"
-                placeholder="Nhập mã OTP (Mock: 123456)"
+                placeholder="Nhập mã OTP"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 maxLength={6}
@@ -154,7 +154,7 @@ const AccountPage = () => {
               <p className="form-label">Nhập mật khẩu để xác nhận tắt 2FA</p>
               <input
                 type="password"
-                placeholder="Nhập mật khẩu (Mock: 123)"
+                placeholder="Nhập mật khẩu"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="password-input"

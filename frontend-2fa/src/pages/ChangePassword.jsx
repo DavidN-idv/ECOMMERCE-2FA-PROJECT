@@ -1,10 +1,9 @@
-//src/pages/ChangePassword.jsx
+// src/pages/ChangePassword.jsx
 import React, { useState } from 'react';
 import authService from "./../services/authService"; 
 import "../styles/AuthPages.css"; 
 
 // --- CÁC HÀM CHẤM ĐIỂM MẬT KHẨU ---
-
 function estimateEntropy(s) {
   let charset = 0;
   if (/[a-z]/.test(s)) charset += 26;
@@ -77,18 +76,23 @@ const ChangePassword = () => {
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  
+  // State ẩn/hiện cho từng ô input
+  const [showOldPass, setShowOldPass] = useState(false);
+  const [showNewPass, setShowNewPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
+
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [isPasswordInfoVisible, setIsPasswordInfoVisible] = useState(false);
   
-  // (Pass email rỗng vì không cần)
   const s = score(newPassword, ""); 
 
   const canSubmit = 
     oldPassword.length > 0 &&
     newPassword === confirmPassword &&
-    s.score >= 4; // Mật khẩu phải mạnh
+    s.score >= 4; 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -109,52 +113,89 @@ const ChangePassword = () => {
 
     try {
       const response = await authService.changePassword(oldPassword, newPassword);
-      setMessage(response.data.message);
+      
+      const msg = response.data?.data?.message || response.data?.message || "Đổi mật khẩu thành công!";
+      
+      setMessage(msg);
       setOldPassword('');
       setNewPassword('');
       setConfirmPassword('');
       setIsPasswordInfoVisible(false); 
+
     } catch (err) {
-      setError(err.response?.data?.message || err.message);
+      const msg = err.response?.data?.response?.data?.message || 
+                  err.response?.data?.message || 
+                  err.message || 
+                  "Lỗi không xác định";
+      setError(msg);
     } finally {
       setLoading(false);
     }
   };
   
   const handlePasswordSectionBlur = (e) => {
-    if (!e.currentTarget.contains(e.relatedTarget)) {
-      setIsPasswordInfoVisible(false);
+    if (e.currentTarget.contains(e.relatedTarget)) {
+      return;
     }
+    setIsPasswordInfoVisible(false);
   };
 
   return (
     <div className="change-password-form">
-      <h3>Đổi Mật Khẩu</h3>
-      <form onSubmit={handleSubmit}>
-        <div>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+        
+        {/* --- Ô MẬT KHẨU CŨ --- */}
+        <div className="auth-input-wrapper">
           <input
             className="auth-input"
-            type="password"
-            placeholder="Mật khẩu cũ (Mock: 123)"
+            type={showOldPass ? "text" : "password"}
+            placeholder="Mật khẩu cũ"
             value={oldPassword}
             onChange={(e) => setOldPassword(e.target.value)}
             required
             disabled={loading}
+            style={{ paddingRight: '40px' }}
           />
+          <button 
+            type="button" 
+            className="icon-btn"
+            onClick={() => setShowOldPass(!showOldPass)}
+            onMouseDown={(e) => e.preventDefault()}
+            tabIndex="-1"
+          >
+            {showOldPass ? "🙈" : "👁️"}
+          </button>
         </div>
         
-        <div className="password-section-wrapper">
-          <input
-            className="auth-input"
-            type="password"
-            placeholder="Mật khẩu mới"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            onFocus={() => setIsPasswordInfoVisible(true)} 
-            required
-            disabled={loading}
-          />
+        {/* --- Ô MẬT KHẨU MỚI --- */}
+        <div 
+          className="password-section-wrapper"
+          onBlur={handlePasswordSectionBlur}
+        >
+          <div className="auth-input-wrapper">
+            <input
+              className="auth-input"
+              type={showNewPass ? "text" : "password"}
+              placeholder="Mật khẩu mới"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              onFocus={() => setIsPasswordInfoVisible(true)} 
+              required
+              disabled={loading}
+              style={{ paddingRight: '40px' }}
+            />
+            <button 
+              type="button" 
+              className="icon-btn"
+              onClick={() => setShowNewPass(!showNewPass)}
+              onMouseDown={(e) => e.preventDefault()}
+              tabIndex="-1"
+            >
+              {showNewPass ? "🙈" : "👁️"}
+            </button>
+          </div>
           
+          {/* Popover đánh giá mật khẩu */}
           {isPasswordInfoVisible && (
             <div className="password-info-popover">
               <div className="meter-wrap">
@@ -164,47 +205,48 @@ const ChangePassword = () => {
                 <span>Độ mạnh: {s.label}</span>
               </div>
               <ul className="tips">
-                <li className={s.flags.len ? 'ok' : ''}>
-                  <span className="dot"></span> Tối thiểu 8 ký tự
-                </li>
-                <li className={s.flags.lower ? 'ok' : ''}>
-                  <span className="dot"></span> Có chữ thường
-                </li>
-                <li className={s.flags.upper ? 'ok' : ''}>
-                  <span className="dot"></span> Có chữ hoa
-                </li>
-                <li className={s.flags.digit ? 'ok' : ''}>
-                  <span className="dot"></span> Có số
-                </li>
-                <li className={s.flags.symbol ? 'ok' : ''}>
-                  <span className="dot"></span> Có ký tự đặc biệt
-                </li>
-                <li className={s.flags.email ? 'ok' : (s.flags.email === false ? 'warn' : '')}>
-                  <span className="dot"></span> Không chứa email
-                </li>
+                <li className={s.flags.len ? 'ok' : ''}><span className="dot"></span> 8+ ký tự</li>
+                <li className={s.flags.lower ? 'ok' : ''}><span className="dot"></span> Chữ thường</li>
+                <li className={s.flags.upper ? 'ok' : ''}><span className="dot"></span> Chữ hoa</li>
+                <li className={s.flags.digit ? 'ok' : ''}><span className="dot"></span> Số</li>
+                <li className={s.flags.symbol ? 'ok' : ''}><span className="dot"></span> Ký tự đặc biệt</li>
               </ul>
             </div>
           )}
         </div> 
 
-        <div>
+        {/* --- Ô XÁC NHẬN MẬT KHẨU --- */}
+        <div className="auth-input-wrapper">
           <input
             className="auth-input"
-            type="password"
+            type={showConfirmPass ? "text" : "password"}
             placeholder="Xác nhận mật khẩu mới"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
             disabled={loading}
+            style={{ paddingRight: '40px' }}
           />
+           <button 
+            type="button" 
+            className="icon-btn"
+            onClick={() => setShowConfirmPass(!showConfirmPass)}
+            onMouseDown={(e) => e.preventDefault()}
+            tabIndex="-1"
+          >
+            {showConfirmPass ? "🙈" : "👁️"}
+          </button>
         </div>
         
-        {message && <p className="success">{message}</p>}
-        {error && <p className="error">{error}</p>}
+        {/* Thông báo lỗi/thành công */}
+        {message && <div className="forgot-message success">{message}</div>}
+        {error && <div className="forgot-message error">{error}</div>}
         
         <button 
           type="submit" 
+          className="auth-btn" 
           disabled={loading || !canSubmit}
+          style={{ marginTop: '10px' }}
         >
           {loading ? 'Đang xử lý...' : 'Đổi Mật Khẩu'}
         </button>

@@ -47,6 +47,11 @@ api.interceptors.response.use(
   (error) => {
     const originalRequest = error.config;
 
+    // Nếu lỗi 401 đến từ request Login, ta từ chối ngay lập tức để trả lỗi về cho UI hiển thị
+    if (originalRequest.url.includes('/auth/login') || originalRequest.url.includes('/login')) {
+      return Promise.reject(error);
+    }
+
     // If 401 and not already retried
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {

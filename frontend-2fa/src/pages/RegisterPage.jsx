@@ -1,6 +1,6 @@
 // src/pages/RegisterPage.jsx
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "./../styles/AuthPages.css";
 import { useAuth } from "../context/AuthContext"; // Use unified authService via context
 
@@ -89,7 +89,7 @@ const RegisterPage = () => {
   const [error, setError] = useState(null);
   // (Loại bỏ state toast)
 
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
   const { register: registerUser } = useAuth(); // Get register function from AuthContext
 
   // (Loại bỏ useEffect của toast)
@@ -153,7 +153,7 @@ const handleSubmit = async (e) => {
             type="email" className="auth-input" placeholder="Email"
             value={email} onChange={(e) => setEmail(e.target.value)}
             required disabled={loading}
-            pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+            //pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
             title="Vui lòng nhập email đúng định dạng (ví dụ: user@domain.com)"
           />
           

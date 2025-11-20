@@ -38,11 +38,26 @@ const registerUser = async (req, res) => {
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
     await Otp.create({ userId: user._id, otpCode });
 
+    // Nội dung Email
+    const message = `
+      <div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
+        <div style="margin:50px auto;width:70%;padding:20px 0">
+          <div style="border-bottom:1px solid #eee">
+            <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">My Beauty</a>
+          </div>
+          <p style="font-size:1.1em">Xin chào,</p>
+          <p>Vui lòng sử dụng mã OTP sau để xác thực email của bạn. Mã có hiệu lực trong 5 phút:</p>
+          <h2 style="background: #00466a;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">${otpCode}</h2>
+          <p style="font-size:0.9em;">Xin cảm ơn,<br />Ecommercial Team</p>
+        </div>
+      </div>
+    `;
+
     // Gửi email
     await sendEmail({
       email: user.email,
-      subject: 'Xác thực tài khoản Ecommercial',
-      message: `Mã xác thực email của bạn là: <b>${otpCode}</b>`
+      subject: 'Xác thực tài khoản My Beauty',
+      message: message,
     });
 
     return sendSuccess(res, {
@@ -107,7 +122,7 @@ const authUser = async (req, res) => {
           <div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
             <div style="margin:50px auto;width:70%;padding:20px 0">
               <div style="border-bottom:1px solid #eee">
-                <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">Instamobile</a>
+                <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">My Beauty</a>
               </div>
               <p style="font-size:1.1em">Xin chào,</p>
               <p>Vui lòng sử dụng mã OTP sau để hoàn tất đăng nhập. Mã có hiệu lực trong 5 phút:</p>
@@ -120,7 +135,7 @@ const authUser = async (req, res) => {
         // Gửi Email
         await sendEmail({
           email: user.email,
-          subject: 'Mã xác thực đăng nhập (2FA)',
+          subject: 'Mã xác thực đăng nhập (2FA) - My Beauty',
           message,
         });
 
@@ -198,7 +213,7 @@ const enable2FARequest = async (req, res) => {
       <div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
         <div style="margin:50px auto;width:70%;padding:20px 0">
           <div style="border-bottom:1px solid #eee">
-            <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">Instamobile</a>
+            <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">My Beauty</a>
           </div>
           <p style="font-size:1.1em">Xin chào,</p>
           <p>Vui lòng sử dụng mã OTP sau để kích hoạt 2FA. Mã có hiệu lực trong 5 phút:</p>
@@ -210,7 +225,7 @@ const enable2FARequest = async (req, res) => {
 
     await sendEmail({
       email: user.email,
-      subject: 'Kích hoạt xác thực 2 lớp (2FA)',
+      subject: 'Kích hoạt xác thực 2 lớp (2FA) - My Beauty',
       message
     });
 
@@ -345,7 +360,7 @@ const forgotPassword = async (req, res) => {
     <div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
       <div style="margin:50px auto;width:70%;padding:20px 0">
         <div style="border-bottom:1px solid #eee">
-          <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">Instamobile</a>
+          <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">My Beauty</a>
         </div>
         <p style="font-size:1.1em">Xin chào,</p>
         <p>Vui lòng sử dụng mã OTP sau để khôi phục mật khẩu. Mã có hiệu lực trong 5 phút:</p>
@@ -359,7 +374,7 @@ const forgotPassword = async (req, res) => {
 
   await sendEmail({
     email: user.email,
-    subject: 'Mã xác thực đăng nhập (2FA)',
+    subject: 'Mã xác thực khôi phục mật khẩu (2FA) - My Beauty',
     message,
   });
 

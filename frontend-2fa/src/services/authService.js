@@ -64,6 +64,10 @@ const authService = {
     return response;
   },
 
+  logout: async () => {
+    return await api.post('/auth/logout');
+  },
+
   refreshToken: async (refreshToken) => {
     const response = await api.post('/auth/refresh', { refreshToken });
     return response;
