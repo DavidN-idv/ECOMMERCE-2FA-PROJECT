@@ -8,6 +8,8 @@ Dự án này là hệ thống xác thực người dùng bảo mật cao dành 
 
 Mô hình dự án: **Monorepo** (Backend và Frontend nằm chung một kho lưu trữ).
 
+Lưu ý: Dự án này không liên quan đến việc bán hàng trực tuyến hoặc các giao dịch tiền tệ. Dự án sử dụng pnpm để chạy và cài đặt thư viện. Vui lòng cài đặt pnpm trước, sau đó vào từng thư mục backend/frontend để cài đặt các thư viện cần thiết (bằng cách chạy lệnh pnpm install).
+
 ## **🚀 Tính năng nổi bật (Key Features)**
 
 * ✅ **Authentication Flow:** Đăng ký, Xác thực Email, Đăng nhập (JWT).  
