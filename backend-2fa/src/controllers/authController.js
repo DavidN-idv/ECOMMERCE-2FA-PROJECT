@@ -16,7 +16,7 @@ import { sendSuccess, sendError } from '../utils/responseParams.js';
 */
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password, phone } = req.body;
+    let { name, email, password, phone } = req.body;
     if (!phone || phone.trim() === "") {
       phone = null;
     }
