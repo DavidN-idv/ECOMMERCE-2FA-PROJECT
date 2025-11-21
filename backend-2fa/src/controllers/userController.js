@@ -1,4 +1,5 @@
 import User from '../models/User.js';
+import Log from '../models/Log.js';
 import { validatePassword } from '../utils/validation.js';
 import { sendSuccess, sendError } from '../utils/responseParams.js';
 
@@ -67,4 +68,22 @@ const changePassword = async (req, res) => {
   }
 };
 
-export { getUserProfile, changePassword };
+/**
+ * @desc    Lấy lịch sử đăng nhập
+ * @route   GET /api/users/logs
+ * @access  Private
+ */
+const getLoginHistory = async (req, res) => {
+  try {
+    // Lấy logs của user hiện tại, sắp xếp mới nhất lên đầu
+    const logs = await Log.find({ userId: req.user._id })
+      .sort({ createdAt: -1 })
+      .limit(10); // Chỉ lấy 10 lần gần nhất cho gọn
+
+    return sendSuccess(res, logs);
+  } catch (error) {
+    return sendError(res, error.message, 500);
+  }
+};
+
+export { getUserProfile, changePassword, getLoginHistory };

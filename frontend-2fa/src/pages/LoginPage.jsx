@@ -1,38 +1,31 @@
 // src/pages/LoginPage.jsx
 import React, { useState } from "react";
-import { Link } from "react-router-dom"; // 1. Import useNavigate
+import { Link } from "react-router-dom"; 
 import "./../styles/AuthPages.css";
-import { useAuth } from "../context/AuthContext"; // Import useAuth from AuthContext
+import { useAuth } from "../context/AuthContext"; 
 
 const LoginPage = () => {
-  // 3. Thêm state cho email và password
   const [email, setEmail] = useState("");
   const [password, setPassword] =useState("");
-  
-  // 4. Thêm state cho loading và error
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null); // Sẽ lưu nội dung lỗi
+  const [error, setError] = useState(null); 
 
-  //const navigate = useNavigate(); // 5. Khởi tạo hook navigate
-  const { login } = useAuth(); // Sử dụng login từ AuthContext
+  //const navigate = useNavigate(); 
+  const { login } = useAuth(); 
 
-  // 6. Cập nhật handleSubmit thành async
   const handleSubmit = async (e) => {
     e.preventDefault(); 
-    setLoading(true); // Bắt đầu loading
-    setError(null); // Xóa lỗi cũ
+    setLoading(true); 
+    setError(null); 
 
     try {
-      // 7. Gọi login từ AuthContext
       await login(email, password);
 
     } catch (err) {
-      // 8. Xử lý khi API ném ra lỗi
       console.error("Lỗi đăng nhập:", err.message);
-      setError(err.message); // Hiển thị lỗi cho người dùng
-
+      setError(err.message); 
     } finally {
-      // 9. Luôn tắt loading sau khi API chạy xong (dù thành công hay lỗi)
       setLoading(false); 
     }
   };
@@ -45,7 +38,7 @@ const LoginPage = () => {
 
         <form className="auth-form" onSubmit={handleSubmit}>
           
-          {/* 10. Hiển thị lỗi nếu có */}
+          {/* Hiển thị lỗi nếu có */}
           {error && <p className="auth-error">{error}</p>}
 
           <input
@@ -55,19 +48,32 @@ const LoginPage = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            disabled={loading} // 11. Vô hiệu hóa khi đang loading
+            disabled={loading} 
           />
-          <input
-            type="password"
-            className="auth-input"
-            placeholder="Mật khẩu"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            disabled={loading} // 11. Vô hiệu hóa khi đang loading
-          />
+          <div className="auth-input-wrapper">
+            <input
+              type={showPassword ? "text" : "password"} 
+              className="auth-input"
+              placeholder="Mật khẩu"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={loading} 
+              style={{ paddingRight: '40px' }} 
+            />
+            
+            <button 
+              type="button" 
+              className="icon-btn" 
+              onClick={() => setShowPassword(!showPassword)}
+              onMouseDown={(e) => e.preventDefault()} 
+              tabIndex="-1"
+            >
+              {showPassword ? "🙈" : "👁️"}
+            </button>
+          </div>
           
-          {/* 12. Thay đổi text và trạng thái button khi loading */}
+          {/* Thay đổi text và trạng thái button khi loading */}
           <button type="submit" className="auth-btn" disabled={loading}>
             {loading ? "Đang đăng nhập..." : "Đăng nhập"}
           </button>

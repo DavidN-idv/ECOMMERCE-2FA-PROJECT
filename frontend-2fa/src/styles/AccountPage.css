@@ -3,7 +3,7 @@
 /* --- Layout Chung --- */
 .account-container {
   min-height: 100vh;
-  background-color: #fff5f7; /* Nền hồng nhạt đặc trưng */
+  background-color: #fff5f7; /* Nền hồng nhạt */
   display: flex;
   justify-content: center;
   padding: 40px 20px;
@@ -13,18 +13,18 @@
 
 .account-wrapper {
   width: 100%;
-  max-width: 600px; /* Giới hạn chiều rộng giống app mobile */
+  max-width: 700px; /* Tăng chiều rộng lên chút cho thoáng */
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
 }
 
 /* --- Header --- */
 .account-header {
   background: white;
-  padding: 25px;
+  padding: 24px 30px;
   border-radius: 16px;
-  box-shadow: 0 4px 15px rgba(231, 84, 128, 0.08);
+  box-shadow: 0 4px 20px rgba(231, 84, 128, 0.08);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -33,195 +33,170 @@
 .user-info {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 16px;
 }
 
 .user-avatar {
-  width: 50px;
-  height: 50px;
-  background-color: #e75480;
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #e75480, #ff8fa3);
   color: white;
   font-size: 24px;
-  font-weight: bold;
+  font-weight: 700;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 10px rgba(231, 84, 128, 0.3);
 }
 
 .user-name {
   margin: 0;
-  font-size: 1.2rem;
-  color: #333;
-  font-weight: 600;
+  font-size: 1.25rem;
+  color: #1f2937;
+  font-weight: 700;
 }
 
 .user-email {
-  margin: 0;
+  margin: 4px 0 0 0;
   font-size: 0.9rem;
-  color: #666;
+  color: #6b7280;
 }
 
-.logout-btn {
-  background-color: transparent;
-  color: #e75480;
-  border: 1px solid #e75480;
-  padding: 8px 18px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.logout-btn:hover {
-  background-color: #e75480;
-  color: white;
-}
-
-/* --- Section (Khối bao quanh 2FA và Đổi mật khẩu) --- */
+/* --- Section Chung --- */
 .account-section {
   background: white;
-  padding: 25px;
+  padding: 24px 30px;
   border-radius: 16px;
-  box-shadow: 0 4px 15px rgba(231, 84, 128, 0.08);
+  box-shadow: 0 4px 20px rgba(231, 84, 128, 0.08);
+  transition: transform 0.2s ease;
+}
+
+/* Tiêu đề Section + Nút Xem lịch sử */
+.section-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f3f4f6;
 }
 
 .section-title {
-  margin-top: 0;
-  margin-bottom: 20px;
+  margin: 0 0 10px;
   font-size: 1.1rem;
-  color: #333;
+  color: #1f2937;
   font-weight: 700;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-/* --- Card điều khiển (Thanh trạng thái & Nút Bật/Tắt/Thay đổi) --- */
+/* --- Cards Điều khiển (2FA, Đổi pass) --- */
 .twofa-card {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 15px 20px;
-  border: 1px solid #f0f0f0;
+  align-items: center; /* Canh giữa theo chiều dọc */
+  padding: 16px;
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
-  background-color: #fafafa;
+  background-color: #f9fafb;
+  gap: 20px; /* Khoảng cách giữa text và nút */
 }
 
 .twofa-status {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  flex: 1; /* Chiếm hết không gian còn lại */
 }
 
+/* Badges */
 .status-badge {
-  font-size: 0.8rem;
-  font-weight: 700;
+  font-size: 0.75rem;
+  font-weight: 800;
   padding: 4px 10px;
   border-radius: 6px;
   display: inline-block;
   width: fit-content;
-  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .status-badge.enabled {
-  background-color: #d1fae5; /* Xanh lá nhạt */
-  color: #065f46;
+  background-color: #d1fae5;
+  color: #047857;
 }
 
 .status-badge.disabled {
-  background-color: #fee2e2; /* Đỏ nhạt */
-  color: #991b1b;
+  background-color: #fee2e2;
+  color: #b91c1c;
 }
 
 .status-text {
   margin: 0;
-  font-size: 0.85rem;
-  color: #666;
-  max-width: 300px;
-  line-height: 1.4;
+  font-size: 0.9rem;
+  color: #4b5563;
+  line-height: 1.5;
 }
 
-/* Nút toggle (Bật/Tắt/Thay đổi) */
-.toggle-btn {
-  padding: 10px 20px;
+/* --- HỆ THỐNG NÚT BẤM (BUTTON SYSTEM) --- */
+/* Chuẩn hóa tất cả nút về cùng một chiều cao và style cơ bản */
+button {
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
   border: none;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+/* 1. Nút Toggle (Bật/Tắt/Thay đổi) - Nằm bên phải Card */
+.toggle-btn {
+  min-width: 100px; /* Cố định chiều rộng tối thiểu để thẳng hàng */
+  height: 40px;     /* Cố định chiều cao */
   border-radius: 8px;
   font-weight: 600;
   font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .toggle-btn.enable {
   background-color: #e75480;
   color: white;
-  box-shadow: 0 2px 5px rgba(231, 84, 128, 0.2);
+  box-shadow: 0 4px 10px rgba(231, 84, 128, 0.2);
 }
 
-.toggle-btn.disable {
-  background-color: #e5e7eb;
-  color: #374151;
-}
-
-.toggle-btn:hover {
-  opacity: 0.9;
+.toggle-btn.enable:hover {
+  background-color: #d64571;
   transform: translateY(-1px);
 }
 
-/* --- Forms (OTP, Password, ChangePassword) --- */
-/* Class này dùng chung cho form hiện ra bên dưới */
-.confirm-form {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px dashed #e5e7eb;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  animation: fadeIn 0.3s ease-out; /* Hiệu ứng hiện ra */
+.toggle-btn.disable {
+  background-color: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
 }
 
-.form-label {
-  margin: 0;
-  font-size: 0.9rem;
-  color: #444;
-  font-weight: 500;
+.toggle-btn.disable:hover {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
 }
 
-/* Style chung cho tất cả input trong Account Page */
-.account-section input {
-  padding: 12px 15px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  width: 100%;
-  box-sizing: border-box;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.account-section input:focus {
-  border-color: #e75480;
-  box-shadow: 0 0 0 3px rgba(231, 84, 128, 0.1);
-}
-
+/* 2. Nút Xác nhận (Trong Form hiện ra) */
 .confirm-btn {
-  padding: 12px;
-  background-color: #e75480; /* Màu hồng nhẹ hơn cho nút xác nhận phụ */
+  width: 100%;
+  height: 44px; /* To hơn chút để dễ bấm */
+  background-color: #e75480;
   color: white;
-  border: none;
   border-radius: 8px;
   font-weight: 600;
-  cursor: pointer;
-  margin-top: 5px;
-  width: 100%;
-  transition: background 0.2s;
+  font-size: 0.95rem;
+  margin-top: 10px;
 }
 
 .confirm-btn:hover {
-  background-color: #d64571;
+  background-color: #be185d;
 }
 
 .confirm-btn:disabled {
@@ -229,55 +204,142 @@
   cursor: not-allowed;
 }
 
+/* 3. Nút Đăng xuất (Viền đỏ/hồng) */
+.logout-btn {
+  height: 36px;
+  padding: 0 20px;
+  border: 1px solid #e75480;
+  background-color: transparent;
+  color: #e75480;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.logout-btn:hover {
+  background-color: #fff0f5;
+}
+
+/* --- Forms Input --- */
+.confirm-form {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px dashed #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.form-label {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.account-section input {
+  height: 44px;
+  padding: 0 15px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.account-section input:focus {
+  border-color: #e75480;
+  box-shadow: 0 0 0 3px rgba(231, 84, 128, 0.1);
+}
+
 /* --- Alerts --- */
 .alert {
-  padding: 12px;
+  padding: 12px 16px;
   border-radius: 8px;
   font-size: 0.9rem;
-  margin-top: 15px;
-  text-align: center;
+  margin-top: 16px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .alert-success {
   background-color: #ecfdf5;
   color: #065f46;
-  border: 1px solid #d1fae5;
+  border: 1px solid #a7f3d0;
 }
 
 .alert-error {
   background-color: #fef2f2;
   color: #991b1b;
-  border: 1px solid #fee2e2;
+  border: 1px solid #fecaca;
 }
+
+/* --- Logs Table --- */
+.logs-container {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  margin-top: 0; /* Bỏ margin top vì đã nằm trong section */
+}
+
+.logs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  min-width: 600px;
+}
+
+.logs-table th {
+  background-color: #f9fafb;
+  color: #4b5563;
+  font-weight: 600;
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.logs-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.logs-table tr:last-child td {
+  border-bottom: none;
+}
+
+.logs-footer {
+  text-align: right;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-style: italic;
+  margin-top: 8px;
+}
+
+/* Badges trong Log */
+.log-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.log-badge.success { background: #d1fae5; color: #065f46; }
+.log-badge.failed { background: #fee2e2; color: #991b1b; }
+.log-badge.info { background: #f3f4f6; color: #4b5563; }
 
 /* --- Animation --- */
 @keyframes fadeIn {
-  from { 
-    opacity: 0; 
-    transform: translateY(-10px); 
-  }
-  to { 
-    opacity: 1; 
-    transform: translateY(0); 
-  }
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Responsive Mobile */
-@media (max-width: 480px) {
-  .twofa-card {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-  }
-  
-  .toggle-btn {
-    width: 100%;
-  }
-  
+/* --- Responsive Mobile --- */
+@media (max-width: 640px) {
   .account-header {
     flex-direction: column;
     gap: 15px;
@@ -286,5 +348,20 @@
   
   .user-info {
     flex-direction: column;
+  }
+
+  .twofa-card {
+    flex-direction: column;
+    align-items: stretch; /* Kéo dãn nút bấm full width */
+    gap: 15px;
+  }
+
+  .toggle-btn {
+    width: 100%; /* Full width trên mobile */
+  }
+  
+  .section-header-row {
+    flex-direction: row; /* Vẫn giữ hàng ngang cho tiêu đề log */
+    align-items: center;
   }
 }

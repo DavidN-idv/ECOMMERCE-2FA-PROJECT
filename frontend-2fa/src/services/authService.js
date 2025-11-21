@@ -72,6 +72,9 @@ const authService = {
     const response = await api.post('/auth/refresh', { refreshToken });
     return response;
   },
+  getLoginHistory: async () => {
+    return await api.get('/users/logs');
+  },
 };
 
 // ============================================================================

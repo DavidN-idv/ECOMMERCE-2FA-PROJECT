@@ -1,9 +1,11 @@
 import User from '../models/User.js';
 import Otp from '../models/Otp.js';
+import Log from '../models/Log.js';
 import PendingUser from '../models/PendingUser.js';
 import bcrypt from 'bcryptjs';
 import generateToken from '../utils/generateToken.js';
 import sendEmail from '../utils/sendEmail.js';
+import jwt from 'jsonwebtoken';
 import { validatePassword } from '../utils/validation.js';
 import { sendSuccess, sendError } from '../utils/responseParams.js';
 
@@ -135,6 +137,9 @@ const authUser = async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
+    // Lấy thông tin ghi log
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const userAgent = req.headers['user-agent'];
 
     if (user && (await user.matchPassword(password))) {
 
@@ -174,6 +179,14 @@ const authUser = async (req, res) => {
       }
 
       // Nếu không bật 2FA
+
+      await Log.create({
+        userId: user._id,
+        action: 'LOGIN_STANDARD',
+        ip,
+        userAgent
+      });
+
       const accessToken = generateToken(res, user._id);
       return sendSuccess(res, {
         accessToken,
@@ -186,6 +199,14 @@ const authUser = async (req, res) => {
       });
 
     } else {
+      if (user) {
+        await Log.create({
+          userId: user._id,
+          action: 'LOGIN_FAILED', // Đánh dấu thất bại
+          ip,
+          userAgent
+        });
+      }
       return sendError(res, 'Sai email hoặc mật khẩu', 401);
     }
   } catch (error) {
@@ -201,9 +222,29 @@ const authUser = async (req, res) => {
 const verify2FA = async (req, res) => {
   try {
     const { userId, otp } = req.body;
+    // Lấy thông tin ghi log
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const userAgent = req.headers['user-agent'];
 
     const otpRecord = await Otp.findOne({ userId, otpCode: otp });
-    if (!otpRecord) return sendError(res, 'Mã OTP không hợp lệ hoặc đã hết hạn');
+    if (!otpRecord) {
+      await Log.create({
+        userId: userId,
+        action: '2FA_FAILED', // Sai OTP
+        ip,
+        userAgent
+      });
+
+      return sendError(res, 'Mã OTP không hợp lệ hoặc đã hết hạn');
+    }
+
+
+    await Log.create({
+      userId: user._id,
+      action: 'LOGIN_2FA',
+      ip,
+      userAgent
+    });
 
     const user = await User.findById(userId);
     await Otp.deleteOne({ _id: otpRecord._id });
@@ -354,12 +395,39 @@ const refreshToken = async (req, res) => {
 * @desc    Đăng xuất (Xóa Cookie)
 * @route   POST /api/auth/logout
 */
-const logoutUser = (req, res) => {
-  res.cookie('jwt', '', {
-    httpOnly: true,
-    expires: new Date(0),
-  });
-  return sendSuccess(res, { message: 'Đăng xuất thành công' });
+const logoutUser = async (req, res) => {
+  try {
+    // Lấy thông tin user từ cookie trước khi xóa
+    const cookies = req.cookies;
+    if (cookies?.jwt) {
+      try {
+        const decoded = jwt.verify(cookies.jwt, process.env.JWT_REFRESH_SECRET);
+
+        // GHI LOG LOGOUT
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const userAgent = req.headers['user-agent'];
+
+        await Log.create({
+          userId: decoded.userId,
+          action: 'LOGOUT',
+          ip,
+          userAgent
+        });
+      } catch (e) {
+        // Token hết hạn -> Tự log out không ghi log
+      }
+    }
+
+    // Xóa Cookie
+    res.cookie('jwt', '', {
+      httpOnly: true,
+      expires: new Date(0),
+    });
+
+    return sendSuccess(res, { message: 'Đăng xuất thành công' });
+  } catch (error) {
+    return sendError(res, error.message, 500);
+  }
 };
 
 

@@ -1,7 +1,7 @@
 // src/pages/ChangePassword.jsx
 import React, { useState } from 'react';
-import authService from "./../services/authService"; 
-import "../styles/AuthPages.css"; 
+import authService from "./../services/authService";
+import "../styles/AuthPages.css";
 
 // --- CÁC HÀM CHẤM ĐIỂM MẬT KHẨU ---
 function estimateEntropy(s) {
@@ -52,9 +52,9 @@ function score(pwVal, emailVal) {
   } else if (sc === 5) {
     labels[5] = "Mạnh";
   }
-  
+
   const perc = [0, 20, 40, 60, 80, 100];
-  
+
   return {
     score: sc,
     label: labels[sc],
@@ -76,7 +76,7 @@ const ChangePassword = () => {
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  
+
   // State ẩn/hiện cho từng ô input
   const [showOldPass, setShowOldPass] = useState(false);
   const [showNewPass, setShowNewPass] = useState(false);
@@ -86,13 +86,13 @@ const ChangePassword = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [isPasswordInfoVisible, setIsPasswordInfoVisible] = useState(false);
-  
-  const s = score(newPassword, ""); 
 
-  const canSubmit = 
+  const s = score(newPassword, "");
+
+  const canSubmit =
     oldPassword.length > 0 &&
     newPassword === confirmPassword &&
-    s.score >= 4; 
+    s.score >= 4;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -113,26 +113,26 @@ const ChangePassword = () => {
 
     try {
       const response = await authService.changePassword(oldPassword, newPassword);
-      
+
       const msg = response.data?.data?.message || response.data?.message || "Đổi mật khẩu thành công!";
-      
+
       setMessage(msg);
       setOldPassword('');
       setNewPassword('');
       setConfirmPassword('');
-      setIsPasswordInfoVisible(false); 
+      setIsPasswordInfoVisible(false);
 
     } catch (err) {
-      const msg = err.response?.data?.response?.data?.message || 
-                  err.response?.data?.message || 
-                  err.message || 
-                  "Lỗi không xác định";
+      const msg = err.response?.data?.response?.data?.message ||
+        err.response?.data?.message ||
+        err.message ||
+        "Lỗi không xác định";
       setError(msg);
     } finally {
       setLoading(false);
     }
   };
-  
+
   const handlePasswordSectionBlur = (e) => {
     if (e.currentTarget.contains(e.relatedTarget)) {
       return;
@@ -143,7 +143,7 @@ const ChangePassword = () => {
   return (
     <div className="change-password-form">
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        
+
         {/* --- Ô MẬT KHẨU CŨ --- */}
         <div className="auth-input-wrapper">
           <input
@@ -156,8 +156,8 @@ const ChangePassword = () => {
             disabled={loading}
             style={{ paddingRight: '40px' }}
           />
-          <button 
-            type="button" 
+          <button
+            type="button"
             className="icon-btn"
             onClick={() => setShowOldPass(!showOldPass)}
             onMouseDown={(e) => e.preventDefault()}
@@ -166,9 +166,9 @@ const ChangePassword = () => {
             {showOldPass ? "🙈" : "👁️"}
           </button>
         </div>
-        
+
         {/* --- Ô MẬT KHẨU MỚI --- */}
-        <div 
+        <div
           className="password-section-wrapper"
           onBlur={handlePasswordSectionBlur}
         >
@@ -179,13 +179,13 @@ const ChangePassword = () => {
               placeholder="Mật khẩu mới"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              onFocus={() => setIsPasswordInfoVisible(true)} 
+              onFocus={() => setIsPasswordInfoVisible(true)}
               required
               disabled={loading}
               style={{ paddingRight: '40px' }}
             />
-            <button 
-              type="button" 
+            <button
+              type="button"
               className="icon-btn"
               onClick={() => setShowNewPass(!showNewPass)}
               onMouseDown={(e) => e.preventDefault()}
@@ -194,7 +194,7 @@ const ChangePassword = () => {
               {showNewPass ? "🙈" : "👁️"}
             </button>
           </div>
-          
+
           {/* Popover đánh giá mật khẩu */}
           {isPasswordInfoVisible && (
             <div className="password-info-popover">
@@ -213,7 +213,7 @@ const ChangePassword = () => {
               </ul>
             </div>
           )}
-        </div> 
+        </div>
 
         {/* --- Ô XÁC NHẬN MẬT KHẨU --- */}
         <div className="auth-input-wrapper">
@@ -227,8 +227,15 @@ const ChangePassword = () => {
             disabled={loading}
             style={{ paddingRight: '40px' }}
           />
-           <button 
-            type="button" 
+          {confirmPassword.length > 0 && (
+            <span
+              className={`validation-icon ${newPassword === confirmPassword ? 'valid' : 'invalid'}`}
+            >
+              {newPassword === confirmPassword ? '✔' : '✖'}
+            </span>
+          )}
+          <button
+            type="button"
             className="icon-btn"
             onClick={() => setShowConfirmPass(!showConfirmPass)}
             onMouseDown={(e) => e.preventDefault()}
@@ -237,14 +244,14 @@ const ChangePassword = () => {
             {showConfirmPass ? "🙈" : "👁️"}
           </button>
         </div>
-        
+
         {/* Thông báo lỗi/thành công */}
         {message && <div className="forgot-message success">{message}</div>}
         {error && <div className="forgot-message error">{error}</div>}
-        
-        <button 
-          type="submit" 
-          className="auth-btn" 
+
+        <button
+          type="submit"
+          className="auth-btn"
           disabled={loading || !canSubmit}
           style={{ marginTop: '10px' }}
         >

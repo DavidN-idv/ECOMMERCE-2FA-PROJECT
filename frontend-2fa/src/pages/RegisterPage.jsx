@@ -52,9 +52,9 @@ function score(pwVal, emailVal) {
   } else if (sc === 5) {
     labels[5] = "Mạnh";
   }
-  
+
   const perc = [0, 20, 40, 60, 80, 100];
-  
+
   return {
     score: sc,
     label: labels[sc],
@@ -85,38 +85,39 @@ const RegisterPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isPasswordInfoVisible, setIsPasswordInfoVisible] = useState(false);
-  
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   //const navigate = useNavigate();
-  const { register: registerUser } = useAuth(); 
+  const { register: registerUser } = useAuth();
 
   useEffect(() => {
     if (error) setTimeout(() => setError(null), 10000);
   }, [error]);
 
   const s = score(password, email);
-  
+
   const canSubmit = s.score >= 4 &&
-                    isValidEmail(email) &&
-                    name.length > 0 &&
-                    password === confirmPassword &&
-                    password.length > 0;
+    isValidEmail(email) &&
+    name.length > 0 &&
+    password === confirmPassword &&
+    password.length > 0;
 
   // (Loại bỏ handleGenerate và handleCopy)
-  
+
   const handlePasswordSectionBlur = (e) => {
     if (!e.currentTarget.contains(e.relatedTarget)) {
       setIsPasswordInfoVisible(false);
     }
   };
 
-const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!canSubmit) {
-       setError("Vui lòng điền đầy đủ và đảm bảo mật khẩu đủ mạnh.");
-       return;
+      setError("Vui lòng điền đầy đủ và đảm bảo mật khẩu đủ mạnh.");
+      return;
     }
     setError(null);
     setLoading(true);
@@ -139,49 +140,49 @@ const handleSubmit = async (e) => {
         <p className="auth-subtitle">Tạo tài khoản mới bắt đầu</p>
 
         <form className="auth-form" onSubmit={handleSubmit}>
-          
+
           {error && <p className="auth-error">{error}</p>}
           {/* (Loại bỏ toast) */}
 
           <input
             type="text" className="auth-input" placeholder="Họ và tên"
-            value={name} onChange={(e) => {setName(e.target.value) ; setError(null)}}
+            value={name} onChange={(e) => { setName(e.target.value); setError(null) }}
             required disabled={loading}
           />
           <input
             type="email" className="auth-input" placeholder="Email"
-            value={email} onChange={(e) => {setEmail(e.target.value); setError(null);}}
+            value={email} onChange={(e) => { setEmail(e.target.value); setError(null); }}
             required disabled={loading}
             //pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
             title="Vui lòng nhập email đúng định dạng (ví dụ: user@domain.com)"
           />
           <input
-            type="tel" 
-            className="auth-input" 
+            type="tel"
+            className="auth-input"
             placeholder="Số điện thoại (Tùy chọn)"
-            value={phone} 
-            onChange={(e) => {setPhone(e.target.value); setError(null);}}
+            value={phone}
+            onChange={(e) => { setPhone(e.target.value); setError(null); }}
             disabled={loading}
           />
-          
+
           {/* Bọc phần mật khẩu và popover */}
-          <div 
+          <div
             className="password-section-wrapper"
             onBlur={handlePasswordSectionBlur}
           >
             <div className="auth-input-wrapper">
               <input
                 type={showPassword ? "text" : "password"}
-                className="auth-input" 
+                className="auth-input"
                 placeholder="Mật khẩu"
-                value={password} 
-                onChange={(e) => {setPassword(e.target.value); setError(null);}}
+                value={password}
+                onChange={(e) => { setPassword(e.target.value); setError(null); }}
                 onFocus={() => setIsPasswordInfoVisible(true)}
                 required minLength={8} disabled={loading}
               />
-              <button 
-                type="button" 
-                className="icon-btn" 
+              <button
+                type="button"
+                className="icon-btn"
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label="Hiện/ẩn mật khẩu"
               >
@@ -192,7 +193,7 @@ const handleSubmit = async (e) => {
             {/* Popover thông tin mật khẩu (hiển thị có điều kiện) */}
             {isPasswordInfoVisible && (
               <div className="password-info-popover">
-                
+
                 {/* (Loại bỏ auth-row) */}
 
                 <div className="meter-wrap">
@@ -225,17 +226,34 @@ const handleSubmit = async (e) => {
               </div>
             )}
           </div>
-          {/* Hết .password-section-wrapper */}
 
-          <input
-            type={showPassword ? "text" : "password"}
-            className="auth-input" 
-            placeholder="Nhập lại mật khẩu"
-            value={confirmPassword} 
-            onChange={(e) => {setConfirmPassword(e.target.value); setError(null);}}
-            required disabled={loading}
-          />
-
+          <div className="auth-input-wrapper">
+            <input
+              type={showPassword ? "text" : "password"}
+              className="auth-input"
+              placeholder="Nhập lại mật khẩu"
+              value={confirmPassword}
+              onChange={(e) => { setConfirmPassword(e.target.value); setError(null); }}
+              required disabled={loading}
+              style={{ paddingRight: '75px' }}
+            />
+            {confirmPassword.length > 0 && (
+              <span
+                className={`validation-icon ${password === confirmPassword ? 'valid' : 'invalid'}`}
+              >
+                {password === confirmPassword ? '✔' : '✖'}
+              </span>
+            )}
+            <button 
+              type="button" 
+              className="icon-btn" 
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              onMouseDown={(e) => e.preventDefault()} // Ngăn mất focus
+              tabIndex="-1"
+            >
+              {showConfirmPassword ? "🙈" : "👁️"}
+            </button>
+          </div>
           <button type="submit" className="auth-btn" disabled={loading || !canSubmit}>
             {loading ? "Đang xử lý..." : "Đăng ký"}
           </button>

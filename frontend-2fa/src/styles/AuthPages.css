@@ -181,6 +181,27 @@ body {
   background: var(--bg-light);
 }
 
+.validation-icon {
+  position: absolute;
+  right: 50px; /* Cách lề phải 40px (để nhường chỗ 30-35px cho con mắt) */
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.1rem;
+  pointer-events: none; /* Để click xuyên qua vào input nếu cần */
+  font-weight: bold;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.validation-icon.valid {
+  color: #22c55e; 
+}
+
+.validation-icon.invalid {
+  color: #ef4444; 
+  font-size: 1rem; 
+}
+
 .password-info-popover {
   display: flex;
   flex-direction: column;

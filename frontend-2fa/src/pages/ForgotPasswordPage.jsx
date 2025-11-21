@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/AuthPages.css";
-import authService from "./../services/authService"; 
+import authService from "./../services/authService";
 
 // --- CÁC HÀM CHẤM ĐIỂM MẬT KHẨU ---
 function estimateEntropy(s) {
@@ -53,9 +53,9 @@ function score(pwVal, emailVal) {
   } else if (sc === 5) {
     labels[5] = "Mạnh";
   }
-  
+
   const perc = [0, 20, 40, 60, 80, 100];
-  
+
   return {
     score: sc,
     label: labels[sc],
@@ -89,16 +89,17 @@ const ForgotPasswordPage = () => {
   const [successMessage, setSuccessMessage] = useState(null);
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   // State hiển thị popover độ mạnh
   const [isPasswordInfoVisible, setIsPasswordInfoVisible] = useState(false);
 
   const s = score(newPassword, email);
 
-  const canSubmitStep2 = 
+  const canSubmitStep2 =
     otp.length > 0 &&
     newPassword === confirmPassword &&
-    s.score >= 4; 
+    s.score >= 4;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -110,13 +111,13 @@ const ForgotPasswordPage = () => {
       // BƯỚC 1: Gửi OTP
       if (!isValidEmail(email)) {
         setError("Vui lòng nhập email đúng định dạng");
-        setLoading(false); 
-        return; 
+        setLoading(false);
+        return;
       }
       try {
         const response = await authService.requestPasswordReset(email);
         setSuccessMessage(response.data.data?.message || response.data.message);
-        setOtpSent(true); 
+        setOtpSent(true);
       } catch (err) {
         const msg = err.response?.data?.response?.data?.message || err.response?.data?.message || "Lỗi gửi email";
         setError(msg);
@@ -130,19 +131,19 @@ const ForgotPasswordPage = () => {
         setLoading(false);
         return;
       }
-      if (s.score < 4) { 
+      if (s.score < 4) {
         setError("Mật khẩu mới quá yếu.");
         setLoading(false);
         return;
       }
-      
+
       try {
         const response = await authService.resetPassword(email, otp, newPassword);
-        setSuccessMessage((response.data.data?.message || "Thành công") + " Đang chuyển hướng..."); 
+        setSuccessMessage((response.data.data?.message || "Thành công") + " Đang chuyển hướng...");
         setTimeout(() => navigate("/login"), 2000);
       } catch (err) {
         const msg = err.response?.data?.response?.data?.message || err.response?.data?.message || "Lỗi đặt lại mật khẩu";
-        setError(msg); 
+        setError(msg);
       } finally {
         setLoading(false);
       }
@@ -153,9 +154,9 @@ const ForgotPasswordPage = () => {
     setOtpSent(false);
     setSuccessMessage(null);
     setError(null);
-    setEmail(""); 
+    setEmail("");
   };
-  
+
   // Xử lý khi blur khỏi vùng password
   const handlePasswordSectionBlur = (e) => {
     if (e.currentTarget.contains(e.relatedTarget)) {
@@ -177,7 +178,7 @@ const ForgotPasswordPage = () => {
         </p>
 
         <form onSubmit={handleSubmit} className="forgot-form">
-          
+
           {/*  EMAIL */}
           {!otpSent && (
             <div className="form-step-enter">
@@ -207,10 +208,10 @@ const ForgotPasswordPage = () => {
                 onChange={(e) => setOtp(e.target.value)}
                 disabled={loading}
               />
-              
+
               <label htmlFor="newPassword" className="forgot-label">Mật khẩu mới</label>
-              
-              <div 
+
+              <div
                 className="password-section-wrapper"
                 onBlur={handlePasswordSectionBlur}
               >
@@ -222,21 +223,21 @@ const ForgotPasswordPage = () => {
                     placeholder="Nhập mật khẩu mới"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    onFocus={() => setIsPasswordInfoVisible(true)} 
+                    onFocus={() => setIsPasswordInfoVisible(true)}
                     disabled={loading}
-                    style={{ paddingRight: '40px' }} 
+                    style={{ paddingRight: '40px' }}
                   />
-                  <button 
-                    type="button" 
-                    className="icon-btn" 
+                  <button
+                    type="button"
+                    className="icon-btn"
                     onClick={() => setShowPassword(!showPassword)}
-                    tabIndex="-1" 
+                    tabIndex="-1"
                     onMouseDown={(e) => e.preventDefault()}
                   >
                     {showPassword ? "🙈" : "👁️"}
                   </button>
                 </div>
-                
+
                 {/* KHỐI POPOVER (Chỉ hiện khi focus) */}
                 {isPasswordInfoVisible && (
                   <div className="password-info-popover">
@@ -255,26 +256,42 @@ const ForgotPasswordPage = () => {
                     </ul>
                   </div>
                 )}
-              </div> 
+              </div>
 
               <label htmlFor="confirmPassword" className="forgot-label">Xác nhận mật khẩu</label>
               <div className="auth-input-wrapper">
-                  <input
-                    id="confirmPassword"
-                    type={showPassword ? "text" : "password"} 
-                    className="forgot-input"
-                    placeholder="Nhập lại mật khẩu mới"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    disabled={loading}
-                  />
+                <input
+                  id="confirmPassword"
+                  type={showPassword ? "text" : "password"}
+                  className="forgot-input"
+                  placeholder="Nhập lại mật khẩu mới"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={loading}
+                />
+                {confirmPassword.length > 0 && (
+                  <span
+                    className={`validation-icon ${newPassword === confirmPassword ? 'valid' : 'invalid'}`}
+                  >
+                    {newPassword === confirmPassword ? '✔' : '✖'}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  className="icon-btn"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  onMouseDown={(e) => e.preventDefault()} // Ngăn mất focus
+                  tabIndex="-1"
+                >
+                  {showConfirmPassword ? "🙈" : "👁️"}
+                </button>
               </div>
             </div>
           )}
-          
-          <button 
-            type="submit" 
-            className="forgot-btn" 
+
+          <button
+            type="submit"
+            className="forgot-btn"
             disabled={loading || (otpSent && !canSubmitStep2)}
           >
             {loading ? "Đang xử lý..." : (otpSent ? "Đổi mật khẩu" : "Gửi mã OTP")}
