@@ -5,6 +5,7 @@ import authService from '../services/authService';
 //import { useNavigate } from 'react-router-dom';
 import ChangePassword from './ChangePassword';
 import '../styles/AccountPage.css';
+import { getErrorMessage } from '../utils/errorHandler';
 
 const AccountPage = () => {
   const { user, logout, setUser } = useAuth();
@@ -41,6 +42,24 @@ const AccountPage = () => {
     }
     fetchLogs();
   }, [showLogs, user]);
+
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        setMessage('');
+      }, 5000); // 5000ms = 5 giây
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError('');
+      }, 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString('vi-VN', {
@@ -102,14 +121,12 @@ const AccountPage = () => {
       setLoading(true);
       try {
         const response = await authService.enable2FARequest();
-        setMessage(response.data.message);
+        const msg = response.data.data?.message || response.data.message || "Đã gửi mã OTP";
+        setMessage(msg);
         setShowOtpInput(true);
         setShowPasswordInput(false);
       } catch (err) {
-        const msg = err.response?.data?.response?.data?.message || 
-                    err.response?.data?.message || 
-                    'Không thể gửi OTP. Vui lòng thử lại sau.';
-        setError(msg);
+        setError(getErrorMessage(err, 'Không thể gửi OTP. Vui lòng thử lại sau.'));
       } finally {
         setLoading(false);
       }
@@ -121,13 +138,14 @@ const AccountPage = () => {
     setLoading(true);
     try {
       const response = await authService.enable2FAConfirm(otp);
-      setMessage(response.data.message);
+      const msg = response.data.data?.message || response.data.message || "Bật 2FA thành công";
+      setMessage(msg);
       setIs2faEnabled(true);
       setShowOtpInput(false);
       setOtp('');
       setUser({ ...user, is2FAEnabled: true });
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Lỗi');
+      setError(getErrorMessage(err, "Lỗi khi bật 2FA"));
     } finally {
       setLoading(false);
     }
@@ -138,13 +156,14 @@ const AccountPage = () => {
     setLoading(true);
     try {
       const response = await authService.disable2FA(password);
-      setMessage(response.data.message);
+      const msg = response.data.data?.message || response.data.message || "Tắt 2FA thành công";
+      setMessage(msg);
       setIs2faEnabled(false);
       setShowPasswordInput(false);
       setPassword('');
       setUser({ ...user, is2FAEnabled: false });
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Lỗi');
+      setError(getErrorMessage(err, "Lỗi khi tắt 2FA"));
     } finally {
       setLoading(false);
     }

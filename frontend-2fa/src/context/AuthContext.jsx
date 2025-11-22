@@ -2,15 +2,8 @@
 import React, { createContext, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import authService from "../services/authService";
+import { getErrorMessage } from "../utils/errorHandler";
 
-const getErrorMessage = (error, defaultMessage) => {
-  return (
-    error.response?.data?.response?.data?.message || 
-    error.response?.data?.message ||                 
-    error.message || 
-    defaultMessage
-  );
-};
 
 const AuthContext = createContext();
 //eslint-disable-next-line react-refresh/only-export-components

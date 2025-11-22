@@ -238,6 +238,9 @@ const verify2FA = async (req, res) => {
       return sendError(res, 'Mã OTP không hợp lệ hoặc đã hết hạn');
     }
 
+    const user = await User.findById(userId);
+    if (!user) return sendError(res, 'Người dùng không tồn tại');
+
 
     await Log.create({
       userId: user._id,
@@ -246,7 +249,7 @@ const verify2FA = async (req, res) => {
       userAgent
     });
 
-    const user = await User.findById(userId);
+
     await Otp.deleteOne({ _id: otpRecord._id });
     const accessToken = generateToken(res, user._id);
     return sendSuccess(res, {

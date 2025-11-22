@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import Log from '../models/Log.js';
+import bcrypt from 'bcryptjs';
 import { validatePassword } from '../utils/validation.js';
 import { sendSuccess, sendError } from '../utils/responseParams.js';
 
@@ -58,7 +59,8 @@ const changePassword = async (req, res) => {
        return sendError(res,'Mật khẩu mới không được trùng với mật khẩu cũ');
     }
 
-    user.password = newPassword;
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
     await user.save();
 
     return sendSuccess(res, { message: 'Đổi mật khẩu thành công!' });
@@ -68,7 +70,7 @@ const changePassword = async (req, res) => {
   }
 };
 
-/**
+/**---------------------------------------------
  * @desc    Lấy lịch sử đăng nhập
  * @route   GET /api/users/logs
  * @access  Private
