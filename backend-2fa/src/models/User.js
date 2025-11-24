@@ -17,10 +17,13 @@ const userSchema = new mongoose.Schema({
   },
   phone: {
     type: String,
-    //required: true,
-    default: '', // Để mặc định rỗng
     unique: true,
     sparse: true, //1 sđt chỉ được dùng cho 1 acc
+    set: v => {
+      if (!v) return undefined;              // nếu null/undefined thì bỏ
+      const trimmed = v.trim();              // loại bỏ khoảng trắng
+      return trimmed === "" ? undefined : trimmed;
+    },
   },
   avatar: {
     type: String,

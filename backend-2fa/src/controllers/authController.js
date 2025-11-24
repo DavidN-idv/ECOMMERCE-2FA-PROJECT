@@ -102,7 +102,9 @@ const verifyEmail = async (req, res) => {
 
     if (!pendingUser) return sendError(res, 'Mã xác thực hết hạn hoặc email chưa đăng ký.');
     if (pendingUser.otpCode !== otp) return sendError(res, 'Mã OTP không chính xác.');
-    const phoneToSave = (pendingUser.phone && pendingUser.phone !== "") ? pendingUser.phone : null;
+    const phoneToSave = (pendingUser.phone && pendingUser.phone.trim() !== "") 
+                    ? pendingUser.phone 
+                    : null;
 
     // Tạo User 
     await User.create({

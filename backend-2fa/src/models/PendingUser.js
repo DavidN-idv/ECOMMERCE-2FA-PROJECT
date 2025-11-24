@@ -4,7 +4,7 @@ const pendingUserSchema = new mongoose.Schema({
   username: { type: String, required: true },
   email: { type: String, required: true },
   password: { type: String, required: true }, // Mật khẩu đã được hash từ Controller
-  phone: { type: String, default: null },
+  phone: { type: String },
   otpCode: { type: String, required: true },
   createdAt: { 
     type: Date, 
